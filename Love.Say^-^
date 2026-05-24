@@ -1,0 +1,452 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Особое послание для тебя ✨</title>
+    <style>
+        :root {
+            --bg-color: #0f0c1b;
+            --accent-pink: #ff4a85;
+            --light-pink: #ff8da1;
+            --text-white: #ffffff;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+        body {
+            background: linear-gradient(135deg, #0f0c1b 0%, #241334 100%);
+            color: var(--text-white);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            min-height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #game-container {
+            width: 92%;
+            max-width: 400px;
+            height: 85vh;
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            align-items: center;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            text-align: center;
+        }
+        .screen {
+            display: none;
+            width: 100%;
+            height: 100%;
+            flex-direction: column;
+            justify-content: space-around;
+            align-items: center;
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+        .screen.active {
+            display: flex;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.96); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        h1 {
+            font-size: 22px;
+            line-height: 1.4;
+            text-shadow: 0 0 10px var(--accent-pink);
+        }
+        p {
+            font-size: 15px;
+            color: #d1c7dc;
+            line-height: 1.5;
+        }
+        .btn {
+            background: linear-gradient(45deg, var(--accent-pink), var(--light-pink));
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 74, 133, 0.4);
+            transition: transform 0.1s;
+            outline: none;
+            z-index: 99;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .btn:active { transform: scale(0.95); }
+        
+        /* Уровень 1: Пазл */
+        .puzzle-box {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            width: 170px;
+            height: 170px;
+        }
+        .puzzle-piece {
+            background: rgba(255, 74, 133, 0.15);
+            border: 2px dashed var(--accent-pink);
+            border-radius: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            -webkit-tap-highlight-color: transparent;
+        }
+        .puzzle-piece.aligned {
+            background: rgba(255, 74, 133, 0.8);
+            border-style: solid;
+            box-shadow: 0 0 15px var(--accent-pink);
+        }
+
+        /* Уровень 2: Кликер */
+        .click-cat {
+            font-size: 65px;
+            cursor: pointer;
+            transition: transform 0.1s ease;
+            display: inline-block;
+        }
+
+        /* Уровень 3: Эмодзи кнопки */
+        .emoji-variants {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            width: 100%;
+        }
+        .emoji-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 14px;
+            padding: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        /* Уровень 4: Ловля сердца */
+        .catch-area {
+            width: 100%;
+            height: 180px;
+            position: relative;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px dashed rgba(255, 255, 255, 0.1);
+        }
+        #target-heart {
+            position: absolute;
+            font-size: 30px;
+            cursor: pointer;
+            transition: left 0.2s, top 0.2s;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Уровень 6: Убегающая кнопка */
+        .btn-wrap {
+            position: relative;
+            width: 100%;
+            height: 140px;
+        }
+        #btn-no {
+            position: absolute;
+            transition: all 0.12s ease-out;
+            background: #4a3b5c;
+            box-shadow: none;
+        }
+        .particle {
+            position: absolute;
+            pointer-events: none;
+            animation: fall linear forwards;
+            z-index: 999;
+        }
+        @keyframes fall {
+            0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+        }
+        .cat-heart {
+            font-size: 65px;
+            animation: heartbeat 1.2s infinite;
+        }
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            20%, 40% { transform: scale(1.12); }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        
+        <!-- Экран 1: Старт -->
+        <div id="screen-start" class="screen active">
+            <div>
+                <span style="font-size: 50px;">🔒✨</span>
+                <h1 style="margin-top: 12px;">Тайная игра<br>только для тебя</h1>
+            </div>
+            <p>Я создал этот сайт секретно. Чтобы разблокировать подарок, пройди 5 забавных уровней с котиками. Удачи! 😊</p>
+            <button class="btn" onclick="nextScreen('screen-puzzle')">Начать квест ➔</button>
+        </div>
+
+        <!-- Уровень 1: Легкий Пазл -->
+        <div id="screen-puzzle" class="screen">
+            <div>
+                <h1>Уровень 1 / 5</h1>
+                <p style="margin-top: 5px;">Разверни картинки ровно (всего пара тапов!)</p>
+            </div>
+            <div class="puzzle-box">
+                <div class="puzzle-piece" id="p1" onclick="rotatePiece('p1')">💖</div>
+                <div class="puzzle-piece" id="p2" onclick="rotatePiece('p2')">🐱</div>
+                <div class="puzzle-piece" id="p3" onclick="rotatePiece('p3')">🐾</div>
+                <div class="puzzle-piece" id="p4" onclick="rotatePiece('p4')">💝</div>
+            </div>
+            <button class="btn" id="puzzle-next" style="display:none;" onclick="nextScreen('screen-clicker')">Супер! Идем дальше ✨</button>
+        </div>
+
+        <!-- Уровень 2: Покорми котика -->
+        <div id="screen-clicker" class="screen">
+            <div>
+                <h1>Уровень 2 / 5</h1>
+                <p style="margin-top: 5px;">Этот котик очень голоден. Кликни по нему 5 раз, чтобы покормить!</p>
+            </div>
+            <div>
+                <div id="click-cat" class="click-cat" onclick="feedCat()">🐱</div>
+                <div id="click-counter" style="font-weight: bold; margin-top: 10px; color: var(--light-pink);">Сытость: 0%</div>
+            </div>
+            <button class="btn" id="clicker-next" style="display:none;" onclick="nextScreen('screen-quiz')">Вкусно! Далее ➔</button>
+        </div>
+
+        <!-- Уровень 3: Романтический Шифр -->
+        <div id="screen-quiz" class="screen">
+            <div>
+                <h1>Уровень 3 / 5</h1>
+                <p style="margin-top: 5px;">Какое чувство у меня возникает, когда я смотрю на твои фотографии?</p>
+            </div>
+            <div class="emoji-variants">
+                <button class="emoji-btn" onclick="wrongAnswer(this)">😴 Сон</button>
+                <button class="emoji-btn" onclick="wrongAnswer(this)">🤔 Скука</button>
+                <button class="emoji-btn" onclick="correctAnswer()">❤️ Космос</button>
+                <button class="emoji-btn" onclick="wrongAnswer(this)">🤖 Роботы</button>
+            </div>
+            <button class="btn" id="quiz-next" style="display:none;" onclick="initCatchLevel()">Попал в точку! Далее ➔</button>
+        </div>
+
+        <!-- Уровень 4: Поймай сердце -->
+        <div id="screen-catch" class="screen">
+            <div>
+                <h1>Уровень 4 / 5</h1>
+                <p style="margin-top: 5px;">Поймай улетающее сердечко (нужно успеть кликнуть 3 раза!)</p>
+                <div id="catch-counter" style="font-size: 14px; margin-top: 3px; color: var(--light-pink);">Поймано: 0 / 3</div>
+            </div>
+            <div class="catch-area">
+                <div id="target-heart" onclick="catchHeart()">❤️</div>
+            </div>
+            <button class="btn" id="catch-next" style="display:none;" onclick="nextScreen('screen-ball')">Поймала! Дальше ➔</button>
+        </div>
+
+        <!-- Уровень 5: Магический предсказатель -->
+        <div id="screen-ball" class="screen">
+            <div>
+                <h1>Уровень 5 / 5</h1>
+                <p style="margin-top: 5px;">Нажми на лапку, чтобы узнать чистую правду о себе</p>
+            </div>
+            <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 16px; width: 100%;">
+                <div style="font-size: 45px; cursor:pointer;" onclick="generateCompliment()">🐾🔮</div>
+                <p id="compliment-text" style="margin-top: 10px; font-style: italic; color: #fff; min-height: 40px;">Нажми на лапку...</p>
+            </div>
+            <button class="btn" id="ball-next" style="display:none;" onclick="nextScreen('screen-quest')">Финальный раунд ➔</button>
+        </div>
+
+        <!-- Уровень 6: Финал-Ловушка -->
+        <div id="screen-quest" class="screen">
+            <div>
+                <span class="cat-heart">🐱</span>
+                <h1>Последний вопрос</h1>
+                <p style="margin-top: 10px; font-weight: bold; color: var(--light-pink);">Ты пойдешь со мной погулять на этих выходных? С меня вкусняшки!</p>
+            </div>
+            <div class="btn-wrap">
+                <button class="btn" id="btn-yes" style="position: absolute; left: 10%; top: 35%;" onclick="celebrate()">ДА!</button>
+                <button class="btn" id="btn-no" style="position: absolute; left: 55%; top: 35%;" onmouseover="runAway()" onclick="runAway()" ontouchstart="runAway(event)">Нет</button>
+            </div>
+        </div>
+
+        <!-- Экран 7: Победа -->
+        <div id="screen-final" class="screen">
+            <div class="cat-heart">😻❤️</div>
+            <h1>Ура! Игра пройдена!</h1>
+            <p>Ты великолепно справилась со всеми уровнями! Сделай скриншот этого экрана, отправь мне в ЛС, и мы спланируем наше крутое свидание. Мяу! ✨</p>
+            <span style="font-size: 14px; color: #8a7a99; margin-top: 10px;">Секретный код: КОТИК_ИМБА_2026</span>
+        </div>
+
+    </div>
+    <script>
+        // Игры настроены так, чтобы всё пролеталось весело и быстро!
+        let puzzleState = { p1: 90, p2: 0, p3: 270, p4: 0 }; // p2 и p4 уже стоят ровно, ей нужно кликнуть всего пару раз!
+        let catClicks = 0;
+        let heartCatches = 0;
+        let catchInterval = null;
+
+        const compliments = [
+            "У тебя самая очаровательная улыбка на свете! ✨",
+            "Твои глаза красивее, чем все звёзды в галактике 🌌",
+            "Ты заставляешь моё сердце биться чуточку быстрее 💓",
+            "Рядом с тобой любой день становится праздником 🍰",
+            "Ты невероятно милая, особенно когда улыбаешься котикам 🐱"
+        ];
+
+        window.onload = function() {
+            for (let id in puzzleState) {
+                const el = document.getElementById(id);
+                if(el) {
+                    el.style.transform = `rotate(${puzzleState[id]}deg)`;
+                    el.style.fontSize = '42px';
+                    if(puzzleState[id] === 0) el.classList.add('aligned');
+                }
+            }
+        };
+
+        function nextScreen(screenId) {
+            clearInterval(catchInterval);
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            const target = document.getElementById(screenId);
+            if(target) target.classList.add('active');
+        }
+
+        // ЛЕГКИЙ ПАЗЛ
+        function rotatePiece(id) {
+            if (navigator.vibrate) navigator.vibrate(30);
+            puzzleState[id] = (puzzleState[id] + 90) % 360;
+            const el = document.getElementById(id);
+            if(!el) return;
+            el.style.transform = `rotate(${puzzleState[id]}deg)`;
+            
+            if (puzzleState[id] === 0) el.classList.add('aligned');
+            else el.classList.remove('aligned');
+
+            if (puzzleState.p1 === 0 && puzzleState.p2 === 0 && puzzleState.p3 === 0 && puzzleState.p4 === 0) {
+                document.getElementById('puzzle-next').style.display = 'block';
+                spawnRain('💖', 8);
+            }
+        }
+
+        // КЛИКЕР
+        function feedCat() {
+            if (navigator.vibrate) navigator.vibrate(40);
+            catClicks++;
+            const cat = document.getElementById('click-cat');
+            const counter = document.getElementById('click-counter');
+            
+            cat.style.transform = `scale(${1 + catClicks * 0.12})`;
+            counter.textContent = `Сытость: ${catClicks * 20}%`;
+            
+            if(catClicks === 3) cat.textContent = '😸';
+            
+            if(catClicks >= 5) {
+                cat.textContent = '😼🍔';
+                counter.textContent = 'Сытость: 100%! Кот доволен!';
+                document.getElementById('clicker-next').style.display = 'block';
+                spawnRain('🐟', 8);
+            }
+        }
+
+        // ШИФР
+        function wrongAnswer(btn) {
+            if (navigator.vibrate) navigator.vibrate(100);
+            btn.style.background = 'rgba(255, 0, 0, 0.2)';
+            btn.textContent = '❌ Не-а';
+        }
+        function correctAnswer() {
+            if (navigator.vibrate) navigator.vibrate([50, 50]);
+            spawnRain('❤️', 15);
+            document.getElementById('quiz-next').style.display = 'block';
+        }
+
+        // ЛОВЛЯ СЕРДЦА
+        function initCatchLevel() {
+            nextScreen('screen-catch');
+            moveHeart();
+            catchInterval = setInterval(moveHeart, 750);
+        }
+        function moveHeart() {
+            const heart = document.getElementById('target-heart');
+            if(!heart) return;
+            const x = Math.floor(Math.random() * 80);
+            const y = Math.floor(Math.random() * 75);
+            heart.style.left = x + '%';
+            heart.style.top = y + '%';
+        }
+        function catchHeart() {
+            if (navigator.vibrate) navigator.vibrate(50);
+            heartCatches++;
+            document.getElementById('catch-counter').textContent = `Поймано: ${heartCatches} / 3`;
+            moveHeart();
+            if(heartCatches >= 3) {
+                clearInterval(catchInterval);
+                document.getElementById('catch-next').style.display = 'block';
+                spawnRain('✨', 10);
+            }
+        }
+
+        // ГЕНЕРАТОР КОМПЛИМЕНТОВ
+        function generateCompliment() {
+            if (navigator.vibrate) navigator.vibrate(30);
+            const textEl = document.getElementById('compliment-text');
+            const randomComp = compliments[Math.floor(Math.random() * compliments.length)];
+            textEl.textContent = randomComp;
+            textEl.style.animation = 'fadeIn 0.3s ease';
+            document.getElementById('ball-next').style.display = 'block';
+        }
+
+        // УБЕГАЮЩАЯ КНОПКА
+        function runAway(event) {
+            if(event) { event.preventDefault(); event.stopPropagation(); }
+            const btnNo = document.getElementById('btn-no');
+            if(!btnNo) return;
+            const randomX = Math.floor(Math.random() * 60) + 5;
+            const randomY = Math.floor(Math.random() * 60) + 5;
+            btnNo.style.left = randomX + '%';
+            btnNo.style.top = randomY + '%';
+        }
+
+        function celebrate() {
+            if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+            spawnRain('🐱', 20);
+            spawnRain('❤️', 20);
+            spawnRain('✨', 20);
+            setTimeout(() => { nextScreen('screen-final'); }, 300);
+        }
+
+        function spawnRain(symbol, count) {
+            for (let i = 0; i < count; i++) {
+                const p = document.createElement('div');
+                p.classList.add('particle');
+                p.textContent = symbol;
+                p.style.fontSize = Math.floor(Math.random() * 16 + 18) + 'px';
+                p.style.left = Math.random() * 100 + 'vw';
+                p.style.top = '-30px';
+                const duration = (Math.random() * 1.2 + 1);
+                p.style.animationDuration = duration + 's';
+                document.body.appendChild(p);
+                setTimeout(() => { p.remove(); }, (duration + 0.5) * 1000);
+            }
+        }
+    </script>
+</body>
+</html>
